@@ -61,7 +61,7 @@ async def delete_contact(contact_id: int = Path(ge=1), db: Session = Depends(get
     return contact
 
 
-@router.post("/find")
+@router.post("/find", response_model=List[ContactResponse])
 async def find_contacts(body: ContactSearchSchema, db: Session = Depends(get_db), user: User = Depends(auth_service.get_current_user)):
     contacts = await contact_repository.find_contacts(body, db, user)
     if not contacts:
