@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from typing import Optional
+import pickle
 
 from fastapi import Depends, HTTPException, status
 from passlib.context import CryptContext
@@ -9,12 +10,13 @@ from jose import JWTError, jwt
 
 from src.database.db import get_db
 from src.repository import users as repo_users
+from src.conf.config import config
 
 
 class Auth:
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-    SECRET_KEY = "09d12b138e9d9a24e18dcc92e8c619b325bd770929dd3a4237be94743f113040"  # os.getenv("SECRET_KEY")
-    ALGORITHM = "HS256"
+    SECRET_KEY = config.SECRET_KEY_JWT
+    ALGORITHM = config.ALGORITHM
 
     def verify_password(self, plain_password, hashed_password):
         return self.pwd_context.verify(plain_password, hashed_password)
@@ -76,6 +78,25 @@ class Auth:
         if user is None:
             raise credentials_exception
         return user
+
+    def create_email_token(self, data: dict):
+        to_encode = data.copy()
+        expire = datetime.utcnow() + timedelta(days=1)
+        to_encode.update({"iat": datetime.utcnow(), "exp": expire})
+        token = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
+        return token
+
+    async def get_email_from_token(self, token: str):
+        try:
+            payload = jwt.decode(token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
+            email = payload["sub"]
+            return email
+        except JWTError as e:
+            print(e)
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Invalid token for email verification",
+            )
 
 
 auth_service = Auth()

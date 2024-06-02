@@ -8,13 +8,14 @@ from src.database.db import get_db
 from src.database.models import User
 from src.services.auth import auth_service
 from src.shemas.contacts import ContactSchema, ContactResponse, ContactUpdateSchema, ContactSearchSchema
+from fastapi_limiter.depends import RateLimiter
 
 from src.repository import contacts as contact_repository
 
 router = APIRouter(prefix='/contacts', tags=['contacts'])
 
 
-@router.get("/", response_model=List[ContactResponse])
+@router.get("/", response_model=List[ContactResponse], dependencies=[Depends(RateLimiter(times=2, seconds=15))])
 async def get_contacts(limit: int = Query(10, ge=10, le=500), offset: int = Query(0, ge=0),
                        db: Session = Depends(get_db), user: User = Depends(auth_service.get_current_user)):
     contacts = await contact_repository.get_contacts(limit, offset, db, user)
@@ -38,7 +39,7 @@ async def get_contact(contact_id: int = Path(ge=1), db: Session = Depends(get_db
     return contact
 
 
-@router.post("/", response_model=ContactResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=ContactResponse, status_code=status.HTTP_201_CREATED, dependencies=[Depends(RateLimiter(times=2, seconds=15))])
 async def create_contact(body: ContactSchema, db: Session = Depends(get_db), user: User = Depends(auth_service.get_current_user)):
     contact = await contact_repository.create_contact(body, db, user)
     return contact

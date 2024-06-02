@@ -13,6 +13,7 @@ class UserResponse(BaseModel):
     id: int = 1
     username: str
     email: str
+    avatar: Optional[str]
 
     class Config:
         from_attributes = True

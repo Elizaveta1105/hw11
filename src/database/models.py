@@ -2,7 +2,7 @@ from datetime import date
 
 from sqlalchemy import Column, Integer, String, ForeignKey, func
 from sqlalchemy.orm import mapped_column, Mapped, relationship
-from sqlalchemy.sql.sqltypes import Date, DateTime
+from sqlalchemy.sql.sqltypes import Date, DateTime, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -34,3 +34,5 @@ class User(Base):
     created_at: Mapped[date] = mapped_column('created_at', DateTime, default=func.now(), nullable=True)
     updated_at: Mapped[date] = mapped_column('updated_at', DateTime, default=func.now(), nullable=True,
                                              onupdate=func.now())
+    confirmed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=True)
+    avatar: Mapped[str] = mapped_column(String(500), nullable=True, default=False)
