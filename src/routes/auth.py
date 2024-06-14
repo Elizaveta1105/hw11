@@ -23,6 +23,18 @@ cache = redis.Redis(host=config.REDIS_DOMAIN, port=config.REDIS_PORT, db=0)
 
 @router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def signup(body: UserSchema, bt: BackgroundTasks, request: Request, db: Session = Depends(get_db)):
+    """
+    Registers a new user.
+
+    Args:
+        body (UserSchema): The user data.
+        bt (BackgroundTasks): Background tasks instance.
+        request (Request): The request instance.
+        db (Session): The database session.
+
+    Returns:
+        UserResponse: The newly created User object.
+    """
     user = await repo_users.get_user_by_email(body.email, db)
     if user:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Account already exists")
@@ -34,6 +46,16 @@ async def signup(body: UserSchema, bt: BackgroundTasks, request: Request, db: Se
 
 @router.post("/login", response_model=TokenSchema, status_code=status.HTTP_200_OK)
 async def login(body: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    """
+    Authenticates a user and returns access and refresh tokens.
+
+    Args:
+        body (OAuth2PasswordRequestForm): The user's credentials.
+        db (Session): The database session.
+
+    Returns:
+        TokenSchema: The access and refresh tokens.
+    """
     user_hash = str(body.username)
     user_data_bytes = cache.get(user_hash)
     if user_data_bytes is None:
@@ -65,6 +87,16 @@ async def login(body: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
 @router.get('/refresh_token')
 async def refresh_token(credentials: HTTPAuthorizationCredentials = Security(get_refresh_token),
                         db: Session = Depends(get_db)):
+    """
+    Refreshes the user's tokens.
+
+    Args:
+        credentials (HTTPAuthorizationCredentials): The user's current tokens.
+        db (Session): The database session.
+
+    Returns:
+        dict: The new access and refresh tokens.
+    """
     token = credentials.credentials
     email = await auth_service.get_email_form_refresh_token(token)
     user = await repo_users.get_user_by_email(email, db)
@@ -81,6 +113,16 @@ async def refresh_token(credentials: HTTPAuthorizationCredentials = Security(get
 
 @router.get('/confirmed_email/{token}', status_code=status.HTTP_200_OK)
 async def confirmed_email(token: str, db: Session = Depends(get_db)):
+    """
+    Confirms a user's email.
+
+    Args:
+        token (str): The confirmation token.
+        db (Session): The database session.
+
+    Returns:
+        dict: A message indicating the email confirmation status.
+    """
     email = await auth_service.get_email_from_token(token)
     user = await repo_users.get_user_by_email(email, db)
     if user is None:
@@ -93,6 +135,18 @@ async def confirmed_email(token: str, db: Session = Depends(get_db)):
 
 @router.post('/reset-password', status_code=status.HTTP_200_OK)
 async def reset_password(email: str, bt: BackgroundTasks, request: Request, db: Session = Depends(get_db)):
+    """
+    Sends a password reset email to a user.
+
+    Args:
+        email (str): The user's email.
+        bt (BackgroundTasks): Background tasks instance.
+        request (Request): The request instance.
+        db (Session): The database session.
+
+    Returns:
+        dict: A message indicating the status of the email sending process.
+    """
     user = await repo_users.get_user_by_email(email, db)
     if user is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Verification error")
@@ -106,12 +160,33 @@ async def reset_password(email: str, bt: BackgroundTasks, request: Request, db: 
 
 @router.get('/reset-password/{token}', status_code=status.HTTP_200_OK)
 async def reset_password(token:str, request: Request):
+    """
+    Validates a password reset token.
+
+    Args:
+        token (str): The password reset token.
+        request (Request): The request instance.
+
+    Returns:
+        dict: A message indicating the status of the token validation process.
+    """
     email = await auth_service.get_email_from_token(token)
     return await reset_password_item(request, email)
 
 
 @router.post('/reset-password/{email}', status_code=status.HTTP_200_OK)
 async def reset_password(email: str, new_password: str = Form(...), db: Session = Depends(get_db)):
+    """
+    Resets a user's password.
+
+    Args:
+        email (str): The user's email.
+        new_password (str): The new password.
+        db (Session): The database session.
+
+    Returns:
+        dict: A message indicating the status of the password reset process.
+    """
     user = await repo_users.get_user_by_email(email, db)
     if user is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Verification error")

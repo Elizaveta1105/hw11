@@ -6,17 +6,18 @@ class Settings(BaseSettings):
     DB_URL: str = "postgresql+psycopg2://postgres:password@localhost:5432/postgres"
     SECRET_KEY_JWT: str = 'secret'
     ALGORITHM: str = 'HS256'
-    MAIL_USERNAME: EmailStr = 'username'
+    MAIL_USERNAME: EmailStr = 'username@test.com'
     MAIL_PASSWORD: str = 'password'
-    MAIL_FROM: str = 'from'
+    MAIL_FROM: str = 'from@test.com'
     MAIL_PORT: int = 435
     MAIL_SERVER: str = 'smtp.meta.com'
     REDIS_DOMAIN: str = 'localhost'
     REDIS_PORT: int = 6379
-    REDIS_PASSWORD: str = None
+    REDIS_PASSWORD: str = "test"
     CLD_NAME: str = 'cloud_name'
     CLD_API_KEY: str = 'api_key'
     CLD_API_SECRET: str = 'api'
+
 
     @field_validator('ALGORITHM')
     @classmethod

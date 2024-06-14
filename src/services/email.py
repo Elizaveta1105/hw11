@@ -23,6 +23,17 @@ conf = ConnectionConfig(
 
 
 async def send_email(email: EmailStr, username: str, host: str):
+    """
+    Sends an email to a user for email confirmation.
+
+    Args:
+        email (EmailStr): The email of the user.
+        username (str): The username of the user.
+        host (str): The host URL.
+
+    Raises:
+        ConnectionErrors: If there is an error with the email connection.
+    """
     try:
         token_verification = auth_service.create_email_token({"sub": email})
         message = MessageSchema(
@@ -39,6 +50,17 @@ async def send_email(email: EmailStr, username: str, host: str):
 
 
 async def send_reset_email(email: EmailStr, username: str, host: str):
+    """
+    Sends an email to a user for password reset.
+
+    Args:
+        email (EmailStr): The email of the user.
+        username (str): The username of the user.
+        host (str): The host URL.
+
+    Raises:
+        ConnectionErrors: If there is an error with the email connection.
+    """
     try:
         token_verification = auth_service.create_email_token({"sub": email})
         message = MessageSchema(
