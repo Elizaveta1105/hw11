@@ -4,7 +4,7 @@ from pydantic import ConfigDict, field_validator, EmailStr
 
 class Settings(BaseSettings):
     DB_URL: str = "postgresql+psycopg2://postgres:password@localhost:5432/postgres"
-    SECRET_KEY_JWT: str = 'secret'
+    SECRET_KEY_JWT: str = '7969e62942c5e433f9422459357d38712696a0ae5d9e83a01213381c55c05af6'
     ALGORITHM: str = 'HS256'
     MAIL_USERNAME: EmailStr = 'username@test.com'
     MAIL_PASSWORD: str = 'password'
@@ -17,7 +17,6 @@ class Settings(BaseSettings):
     CLD_NAME: str = 'cloud_name'
     CLD_API_KEY: str = 'api_key'
     CLD_API_SECRET: str = 'api'
-
 
     @field_validator('ALGORITHM')
     @classmethod
