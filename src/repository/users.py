@@ -18,10 +18,11 @@ async def get_user_by_email(email: str, db: Session = Depends(get_db)):
     :param db: Session: Pass the database session to the function
     :return: A user object if the email exists in the database
     """
-    async with db as session:
-        result = await session.execute(select(User).filter_by(username=email))
-        user = result.scalar_one_or_none()
-        return user
+    stmt = select(User).filter_by(email=email)
+    user = db.execute(stmt)
+    user = user.scalar_one_or_none()
+
+    return user
 
 
 async def create_user(body: UserSchema, db: Session = Depends(get_db)):

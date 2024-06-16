@@ -36,7 +36,7 @@ class ContactResponse(BaseModel):
     email: str
     phone: str
     birthday: datetime
-    description: str
+    description: str | None
     created_at: datetime | None
     updated_at: datetime | None
     user: UserResponse | None
